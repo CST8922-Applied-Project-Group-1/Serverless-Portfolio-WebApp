@@ -142,7 +142,7 @@ const Login = () => {
           </button>
 
           <div className="register-section">
-            <p>Don't have an account? <span className="register-link">Register</span></p>
+            <p>Don't have an account? <Link to="/register" className="register-link">Register</Link></p>
           </div>
         </form>
       </div>

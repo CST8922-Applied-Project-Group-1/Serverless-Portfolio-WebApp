@@ -1,0 +1,111 @@
+.register-page {
+  min-height: 100vh;
+  background-color: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 560px;
+  background: white;
+  border-radius: 18px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.register-header {
+  margin-bottom: 18px;
+}
+
+.back-link {
+  border: none;
+  background: none;
+  font-size: 20px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.register-header h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+}
+
+.register-header p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.register-form .form-group {
+  margin-bottom: 14px;
+}
+
+.register-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.register-form input,
+.register-form select {
+  width: 100%;
+  height: 44px;
+  border: 1px solid #cfd4dc;
+  border-radius: 14px;
+  padding: 0 14px;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+.birth-row {
+  display: flex;
+  gap: 10px;
+}
+
+.birth-row select {
+  flex: 1;
+}
+
+.register-button {
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: 24px;
+  background-color: #1877f2;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.register-button:hover {
+  background-color: #0f63d1;
+}
+
+.login-section {
+  text-align: center;
+  margin-top: 14px;
+}
+
+.login-link {
+  color: #1877f2;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.field-error {
+  display: block;
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.error {
+  border-color: red !important;
+}

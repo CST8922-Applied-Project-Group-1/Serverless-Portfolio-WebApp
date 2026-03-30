@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].portfolio
+CREATE TABLE [dbo].profile
 (
     profile_id VARCHAR(255) PRIMARY KEY, -- Unique ID for the portfolio
     user_id VARCHAR(255) NOT NULL,       -- Foreign key column
@@ -15,12 +15,12 @@ CREATE TABLE [dbo].portfolio
 
 
 SELECT profile_id, user_id, headline, summary, professional_field
-FROM [dbo].portfolio
+FROM [dbo].profile
 WHERE summary LIKE '%cloud%';
 
-SELECT * FROM [dbo].portfolio;
+SELECT * FROM [dbo].profile;
 
-INSERT INTO [dbo].portfolio (profile_id, user_id, headline, summary, professional_field, is_public, updated_at)
+INSERT INTO [dbo].profile (profile_id, user_id, headline, summary, professional_field, is_public, updated_at)
 VALUES
 ('p1_id_abc', 'u1_id_xyz', 'Experienced Software Engineer', 'A seasoned cloud engineer with 5+ years in full-stack development using Node.js and React.', 'Software Engineering', 1, SYSUTCDATETIME()),
 ('p2_id_def', 'u2_id_uvw', 'Marketing Manager', 'Creative marketing professional skilled in digital campaigns and social media strategy.', 'Marketing', 1, SYSUTCDATETIME()),

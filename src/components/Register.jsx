@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/Register.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://portfolio-dev-func-se9pa3.azurewebsites.net/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +18,7 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -64,15 +68,46 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    alert('Registration successful!');
-    navigate('/');
+    setLoading(true);
+
+    try {
+      // Call Azure Functions backend
+      const fullName = `${formData.firstName} ${formData.lastName}`;
+      const response = await axios.post(`${API_URL}/auth/register`, {
+        name: fullName,
+        email: formData.email,
+        password: formData.password
+      });
+
+      if (response.data.success) {
+        const { token, user } = response.data;
+        
+        // Store auth token
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        alert(`Registration successful! Welcome ${user.name}`);
+        navigate('/dashboard');
+      } else {
+        setErrors({ submit: response.data.error || 'Registration failed' });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (error.response?.data?.error) {
+        setErrors({ submit: error.response.data.error });
+      } else {
+        setErrors({ submit: 'Registration failed. Please try again.' });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,6 +120,19 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">
+          {errors.submit && (
+            <div className="error-message" style={{
+              backgroundColor: '#fee',
+              color: '#c33',
+              padding: '10px',
+              borderRadius: '5px',
+              marginBottom: '15px',
+              textAlign: 'center'
+            }}>
+              {errors.submit}
+            </div>
+          )}
+
           <div className="form-group">
             <label htmlFor="firstName">First Name</label>
             <input
@@ -191,8 +239,8 @@ const Register = () => {
             {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
-          <button type="submit" className="register-button">
-            Submit
+          <button type="submit" className="register-button" disabled={loading}>
+            {loading ? 'Creating account...' : 'Submit'}
           </button>
 
           <div className="login-section">

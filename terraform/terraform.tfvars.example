@@ -1,0 +1,47 @@
+# General Configuration
+project_name        = "portfolio"
+environment         = "dev"
+location            = "eastus2"  # Allowed regions: eastus2, southcentralus, canadacentral, westus3, westus
+resource_group_name = ""  # Leave empty to auto-generate name
+
+# Tags
+tags = {
+  Project     = "Portfolio"
+  Environment = "Development"
+  ManagedBy   = "Terraform"
+}
+
+# Storage Account Configuration
+storage_account_tier             = "Standard"
+storage_account_replication_type = "LRS"
+
+# Azure SQL Database Configuration
+sql_admin_username      = "sqladmin"
+sql_admin_password      = "YourSecurePassword123!"  # CHANGE THIS!
+sql_database_sku        = "Basic"
+sql_database_max_size_gb = 2
+
+# Function App Configuration
+function_app_runtime         = "node"
+function_app_runtime_version = "18"
+function_app_service_plan_sku = "Y1"  # Y1 = Consumption Plan
+
+# Service Bus Configuration
+service_bus_sku = "Standard"
+
+# Key Vault Configuration
+key_vault_sku                           = "standard"
+key_vault_enabled_for_deployment        = true
+key_vault_enabled_for_disk_encryption   = true
+key_vault_enabled_for_template_deployment = true
+
+# Web PubSub Configuration
+webpubsub_sku      = "Free_F1"
+webpubsub_capacity = 1
+
+# Application Insights Configuration
+application_insights_type = "web"
+
+# Static Web App Configuration (optional, if using Static Web Apps instead of Storage static website)
+static_web_app_sku_tier = "Free"
+static_web_app_sku_size = "Free"

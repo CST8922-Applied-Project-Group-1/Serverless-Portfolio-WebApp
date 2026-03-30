@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/Login.css';
+
+const API_URL = process.env.REACT_APP_API_URL || 'https://portfolio-dev-func-se9pa3.azurewebsites.net/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +14,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -42,26 +46,50 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
 
-    if (formData.username === 'demo' && formData.password === 'demo123') {
-      const authToken = 'mock-auth-token-' + Date.now();
-      localStorage.setItem('authToken', authToken);
-      localStorage.setItem('username', formData.username);
-      
-      if (formData.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
+    setLoading(true);
+    setLoginError('');
+
+    try {
+      // Call Azure Functions backend
+      const response = await axios.post(`${API_URL}/auth/login`, {
+        email: formData.username,
+        password: formData.password
+      });
+
+      if (response.data.success) {
+        const { token, user } = response.data;
+        
+        // Store auth token
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        
+        if (formData.rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        }
+        
+        alert(`Login successful! Welcome ${user.name}`);
+        navigate('/dashboard');
+      } else {
+        setLoginError(response.data.error || 'Login failed');
       }
-      
-      alert('Login successful! Welcome to your portfolio.');
-      navigate('/dashboard');
-    } else {
-      setLoginError('Invalid username or password. Try demo/demo123');
+    } catch (error) {
+      console.error('Login error:', error);
+      if (error.response?.data?.error) {
+        setLoginError(error.response.data.error);
+      } else if (error.response?.status === 401) {
+        setLoginError('Invalid email or password');
+      } else {
+        setLoginError('Login failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,8 +165,8 @@ const Login = () => {
             </Link>
           </div>
 
-          <button type="submit" className="login-button">
-            Sign In
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
           <div className="register-section">

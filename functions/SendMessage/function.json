@@ -1,0 +1,24 @@
+{
+  "bindings": [
+    {
+      "authLevel": "function",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": ["post"],
+      "route": "messages"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    },
+    {
+      "type": "serviceBus",
+      "direction": "out",
+      "name": "outputMessage",
+      "queueName": "messages-queue",
+      "connection": "SERVICE_BUS_CONNECTION_STRING"
+    }
+  ]
+}

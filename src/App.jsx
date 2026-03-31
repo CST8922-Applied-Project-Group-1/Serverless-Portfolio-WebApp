@@ -1,11 +1,21 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
 import Register from './components/Register';
+import HomePage from './components/Dashboard';
 import './App.css';
 
+// Protected Route
+const ProtectedRoute = ({ children }) => {
+  const authToken = localStorage.getItem('authToken');
+  return authToken ? children : <Navigate to="/" replace />;
+};
+
+// Dashboard
 const Dashboard = () => {
+  const navigate = useNavigate(); 
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
@@ -13,16 +23,26 @@ const Dashboard = () => {
     window.location.href = '/';
   };
 
-  // Get user data from localStorage (set during login/register)
   const userStr = localStorage.getItem('user');
   const user = userStr ? JSON.parse(userStr) : null;
   const username = user?.name || user?.email || 'User';
+
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/home');
+    }, 1500); // 1.5 sec
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
     <div className="dashboard">
       <div className="dashboard-content">
         <h1>Welcome to Your Portfolio, {username}!</h1>
         <p>You have successfully logged in.</p>
+        <p>Redirecting to your home page...</p>
+
         {user && (
           <div style={{
             marginTop: '20px',
@@ -36,7 +56,8 @@ const Dashboard = () => {
             <p><strong>Name:</strong> {user.name}</p>
           </div>
         )}
-        <button onClick={handleLogout} className="logout-button" style={{marginTop: '20px'}}>
+
+        <button onClick={handleLogout} className="logout-button" style={{ marginTop: '20px' }}>
           Logout
         </button>
       </div>
@@ -44,11 +65,7 @@ const Dashboard = () => {
   );
 };
 
-const ProtectedRoute = ({ children }) => {
-  const authToken = localStorage.getItem('authToken');
-  return authToken ? children : <Navigate to="/" replace />;
-};
-
+// App
 function App() {
   return (
     <Router>
@@ -57,6 +74,8 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* Dashboard transfter） */}
           <Route
             path="/dashboard"
             element={
@@ -65,6 +84,18 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* HomePage */}
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

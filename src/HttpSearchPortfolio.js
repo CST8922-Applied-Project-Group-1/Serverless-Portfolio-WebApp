@@ -1,9 +1,6 @@
 /**
- * @author Ryan Baldwin
- * @date 2026-03-28
- * @version 1.0.0
  * 
- * It is a HTTP GET request that will take a search parameter and perform sql search for it from the Azure SQL database.
+ * A HTTP GET request that will take a search parameter and perform a sql search for it from the Azure SQL database.
  * Should return the requested user portfolio, status
  * code and a success or fail message.
  * 
@@ -11,29 +8,12 @@
 
 
 const { app } = require('@azure/functions');
-//const { MongoClient } = require('mongodb'); // For CommonJS modules
 const sql = require('mssql');
 const http = require('http');
 const url = require('url'); // Node.js built-in url module
 require('dotenv').config() // or import 'dotenv/config' if you're using ES6
 
-
-/*const config = {
-    user: 'username', // better stored in an app setting such as process.env.DB_USER
-    password: 'password', // better stored in an app setting such as process.env.DB_PASSWORD
-    server: 'cst8922portfolioserver.database.windows.net.windows.net', // better stored in an app setting such as process.env.DB_SERVER
-    port: 1433, // optional, defaults to 1433, better stored in an app setting such as process.env.DB_PORT
-    database: 'AdventureWorksLT', // better stored in an app setting such as process.env.DB_NAME
-    authentication: {
-        type: 'default'
-    },
-    options: {
-        encrypt: true
-    }
-}*/
-
-console.log(process.env) // remove this after you've confirmed it is working
-
+console.log('Process.env: ' + process.env) // remove this after you've confirmed it is working
 
 //Use Azure VM Managed Identity to connect to the SQL database
 const config = {
@@ -47,22 +27,6 @@ const config = {
         encrypt: true
     }
 }
-/*
-    //Use Azure App Service Managed Identity to connect to the SQL database
-    const config = {
-        server: process.env["db_server"],
-        port: process.env["db_port"],
-        database: process.env["db_database"],
-        authentication: {
-            type: 'azure-active-directory-msi-app-service'
-        },
-        options: {
-            encrypt: true
-        }
-    }
-*/
-
-
 
 app.http('httpTriggerSearchPortfolio', {
     methods: ['GET'],
@@ -84,40 +48,37 @@ app.http('httpTriggerSearchPortfolio', {
             };
         }
 
-        //async function connectAndQuery() {
-            try {
-                var poolConnection = await sql.connect(config);
+        try {
+            var poolConnection = await sql.connect(config);
 
-                console.log("Reading rows from the Table...");
-                var resultSet = await poolConnection.request().query(`SELECT profile_id, user_id, headline, summary, professional_field
-                                                                        FROM '${process.env["db_database"]}'.portfolio
+            console.log("Reading rows from the Table...");
+            var resultSet = await poolConnection.request().query(`SELECT profile_id, user_id, headline, summary, professional_field
+                                                                        FROM '${process.env["db_database"]}'.profiles
                                                                         WHERE summary LIKE '%${searchSummary}%';`);
 
-                console.log(`${resultSet.recordset.length} rows returned.`);
+            console.log(`${resultSet.recordset.length} rows returned.`);
 
-                // output column h
-                // eaders
-                var columns = "";
-                for (var column in resultSet.recordset.columns) {
-                    columns += column + ", ";
-                }
-                console.log("%s\t", columns.substring(0, columns.length - 2));
-
-                // output row contents from default record set
-                resultSet.recordset.forEach(row => {
-                    console.log("%s\t%s", row.CategoryName, row.ProductName);
-                });
-
-                // close connection only when we're certain application is finished
-                poolConnection.close();
-
-                return {
-                    status: 200, // Defaults to 200 
-                    body: "Portfolio search results : " + JSON.stringify(resultSet.recordset) // resultSet.recordset contains the rows returned by the query
-                };
-            } catch (err) {
-                console.error(err.message);
+            // output column headers
+            var columns = "";
+            for (var column in resultSet.recordset.columns) {
+                columns += column + ", ";
             }
-        //}
+            console.log("%s\t", columns.substring(0, columns.length - 2));
+
+            // output row contents from default record set
+            resultSet.recordset.forEach(row => {
+                console.log("%s\t%s", row.CategoryName, row.ProductName);
+            });
+
+            // close connection only when we're certain application is finished
+            poolConnection.close();
+
+            return {
+                status: 200, // Defaults to 200 
+                body: "Portfolio search results : " + JSON.stringify(resultSet.recordset) // resultSet.recordset contains the rows returned by the query
+            };
+        } catch (err) {
+            console.error(err.message);
+        }
     }
 });

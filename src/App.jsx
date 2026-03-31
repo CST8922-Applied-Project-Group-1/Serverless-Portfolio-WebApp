@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'r
 import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
 import Register from './components/Register';
-import HomePage from './components/Dasboard';
+import HomePage from './components/Dashboard';
 import './App.css';
 
 // Protected Route

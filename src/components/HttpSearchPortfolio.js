@@ -52,9 +52,10 @@ app.http('httpTriggerSearchPortfolio', {
             var poolConnection = await sql.connect(config);
 
             console.log("Reading rows from the Table...");
-            var resultSet = await poolConnection.request().query(`SELECT profile_id, user_id, headline, summary, professional_field
-                                                                        FROM '${process.env["db_database"]}'.profiles
-                                                                        WHERE summary LIKE '%${searchSummary}%';`);
+            var resultSet = await poolConnection.request().input('searchSummary', sql.VarChar, searchSummary) // Use Parameterized query to prevent SQL injection
+                                                            .query(`SELECT profile_id, user_id, headline, summary, professional_field
+                                                                    FROM '${process.env["db_database"]}'.profile
+                                                                    WHERE summary LIKE '%@searchSummary%';`);
 
             console.log(`${resultSet.recordset.length} rows returned.`);
 

@@ -10,44 +10,40 @@ module.exports = async function (context, req) {
 
   const { name, bio, skills, experience } = req.body || {};
 
-  if (!name) {
-    context.res = {
-      status: 400,
-      body: { error: 'Name is required' }
-    };
-    return;
-  }
-
   try {
     const pool = await getConnection();
 
-    const existing = await pool.request()
-      .input('userId', sql.Int, auth.user.userId)
-      .query('SELECT TOP 1 * FROM Profiles WHERE UserId = @userId');
-
-    if (existing.recordset.length > 0) {
-      context.res = {
-        status: 409,
-        body: { error: 'Profile already exists' }
-      };
-      return;
-    }
-
     const result = await pool.request()
       .input('userId', sql.Int, auth.user.userId)
-      .input('name', sql.NVarChar, name)
-      .input('email', sql.NVarChar, auth.user.email)
+      .input('name', sql.NVarChar, name || '')
       .input('bio', sql.NVarChar(sql.MAX), bio || '')
       .input('skills', sql.NVarChar(sql.MAX), JSON.stringify(skills || []))
       .input('experience', sql.NVarChar(sql.MAX), experience || '')
       .query(`
-        INSERT INTO Profiles (UserId, Name, Email, Bio, Skills, Experience, CreatedAt, UpdatedAt)
-        OUTPUT INSERTED.*
-        VALUES (@userId, @name, @email, @bio, @skills, @experience, GETDATE(), GETDATE())
+        UPDATE Profiles
+        SET
+          Name = @name,
+          Bio = @bio,
+          Skills = @skills,
+          Experience = @experience,
+          UpdatedAt = GETDATE()
+        WHERE UserId = @userId;
+
+        SELECT TOP 1 *
+        FROM Profiles
+        WHERE UserId = @userId;
       `);
 
+    if (result.recordset.length === 0) {
+      context.res = {
+        status: 404,
+        body: { error: 'Profile not found' }
+      };
+      return;
+    }
+
     context.res = {
-      status: 201,
+      status: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
@@ -55,10 +51,10 @@ module.exports = async function (context, req) {
       body: result.recordset[0]
     };
   } catch (error) {
-    context.log.error('CreateProfile error:', error);
+    context.log.error('UpdateProfile error:', error);
     context.res = {
       status: 500,
-      body: { error: 'Failed to create profile' }
+      body: { error: 'Failed to update profile' }
     };
   }
 };

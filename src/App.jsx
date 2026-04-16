@@ -4,6 +4,7 @@ import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
 import Register from './components/Register';
 import HomePage from './components/Dashboard';
+import ProfilePage from './components/ProfilePage';
 import './App.css';
 
 // Protected Route
@@ -94,6 +95,15 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+  path="/profile"
+  element={
+    <ProtectedRoute>
+      <ProfilePage />
+    </ProtectedRoute>
+  }
+/>
 
           {/* fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -41,6 +41,11 @@ const HomePage = () => {
             <p>Build and maintain your professional network.</p>
           </div>
 
+          <div className="sidebar-card" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
+            <h3>Create Profile</h3>
+            <p>Add your personal and professional information.</p>
+          </div>
+
           <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>

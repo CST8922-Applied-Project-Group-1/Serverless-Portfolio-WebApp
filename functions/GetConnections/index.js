@@ -1,53 +1,77 @@
-const sql = require('mssql');
+const { validateToken, unauthorizedResponse } = require('../shared/auth');
+const { sql, getConnection } = require('../shared/db');
 
 module.exports = async function (context, req) {
-    const userId = context.bindingData.userId;
+  const corsHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': 'http://localhost:3000',
+    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
 
-    try {
-        const pool = await sql.connect(process.env.SQL_CONNECTION_STRING);
-        
-        const result = await pool.request()
-            .input('userId', sql.Int, userId)
-            .query(`
-                SELECT 
-                    c.ConnectionId,
-                    c.UserId1,
-                    c.UserId2,
-                    c.ConnectedAt,
-                    c.Status,
-                    CASE 
-                        WHEN c.UserId1 = @userId THEN p2.Name
-                        ELSE p1.Name
-                    END as ConnectionName,
-                    CASE 
-                        WHEN c.UserId1 = @userId THEN p2.Email
-                        ELSE p1.Email
-                    END as ConnectionEmail
-                FROM Connections c
-                LEFT JOIN Profiles p1 ON c.UserId1 = p1.UserId
-                LEFT JOIN Profiles p2 ON c.UserId2 = p2.UserId
-                WHERE (c.UserId1 = @userId OR c.UserId2 = @userId)
-                AND c.Status = 'accepted'
-            `);
+  if (req.method === 'OPTIONS') {
+    context.res = {
+      status: 200,
+      headers: corsHeaders
+    };
+    return;
+  }
 
-        context.res = {
-            status: 200,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: {
-                connections: result.recordset,
-                count: result.recordset.length
-            }
-        };
-    } catch (error) {
-        context.log.error('Error fetching connections:', error);
-        context.res = {
-            status: 500,
-            body: { error: 'Failed to fetch connections' }
-        };
-    } finally {
-        await sql.close();
+  const auth = validateToken(req);
+  if (!auth.valid) {
+    context.res = {
+      ...unauthorizedResponse(auth.error),
+      headers: corsHeaders
+    };
+    return;
+  }
+
+  try {
+    const routeUserId = Number(context.bindingData.userId);
+
+    if (!routeUserId || Number.isNaN(routeUserId)) {
+      context.res = {
+        status: 400,
+        headers: corsHeaders,
+        body: { error: 'Invalid userId route parameter' }
+      };
+      return;
     }
+
+    if (routeUserId !== Number(auth.user.userId)) {
+      context.res = {
+        status: 403,
+        headers: corsHeaders,
+        body: { error: 'Forbidden' }
+      };
+      return;
+    }
+
+    const pool = await getConnection();
+
+    const result = await pool.request()
+      .input('userId', sql.Int, routeUserId)
+      .query(`
+        SELECT *
+        FROM dbo.Connections
+        WHERE UserId1 = @userId OR UserId2 = @userId
+        ORDER BY ConnectedAt DESC
+      `);
+
+    context.res = {
+      status: 200,
+      headers: corsHeaders,
+      body: result.recordset
+    };
+  } catch (error) {
+    context.log.error('Error fetching connections:', error);
+    context.res = {
+      status: 500,
+      headers: corsHeaders,
+      body: {
+        error: 'Failed to fetch connections',
+        details: error.message
+      }
+    };
+  }
 };

@@ -1,92 +1,39 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import Login from './components/Login';
-import ForgotPassword from './components/ForgotPassword';
-import Register from './components/Register';
-import HomePage from './components/Dashboard';
-import ProfilePage from './components/ProfilePage';
-import './App.css';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Login from "./components/Login";
+import ForgotPassword from "./components/ForgotPassword";
+import Register from "./components/Register";
+import HomePage from "./components/Dashboard";
+import ProfilePage from "./components/ProfilePage";
+import MessagesPage from "./components/MessagesPage";
+import SearchUsersPage from "./components/SearchUsersPage";
+import ManageConnectionsPage from "./components/ManageConnectionsPage";
+import UserProfileViewPage from "./components/UserProfileViewPage";
+import LandingPage from "./components/LandingPage";
+import "./App.css";
 
-// Protected Route
 const ProtectedRoute = ({ children }) => {
-  const authToken = localStorage.getItem('authToken');
-  return authToken ? children : <Navigate to="/" replace />;
+  const authToken = localStorage.getItem("authToken");
+  return authToken ? children : <Navigate to="/login" replace />;
 };
 
-// Dashboard
-const Dashboard = () => {
-  const navigate = useNavigate(); 
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
-    localStorage.removeItem('rememberMe');
-    window.location.href = '/';
-  };
-
-  const userStr = localStorage.getItem('user');
-  const user = userStr ? JSON.parse(userStr) : null;
-  const username = user?.name || user?.email || 'User';
-
-  
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate('/home');
-    }, 1500); // 1.5 sec
-
-    return () => clearTimeout(timer);
-  }, [navigate]);
-
-  return (
-    <div className="dashboard">
-      <div className="dashboard-content">
-        <h1>Welcome to Your Portfolio, {username}!</h1>
-        <p>You have successfully logged in.</p>
-        <p>Redirecting to your home page...</p>
-
-        {user && (
-          <div style={{
-            marginTop: '20px',
-            padding: '15px',
-            backgroundColor: '#f0f8ff',
-            borderRadius: '8px'
-          }}>
-            <h3>Your Account Details:</h3>
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>User ID:</strong> {user.userId}</p>
-            <p><strong>Name:</strong> {user.name}</p>
-          </div>
-        )}
-
-        <button onClick={handleLogout} className="logout-button" style={{ marginTop: '20px' }}>
-          Logout
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// App
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Login />} />
+          {/* Public pages */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* Dashboard transfter） */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          {/* HomePage */}
+          {/* Protected pages */}
           <Route
             path="/home"
             element={
@@ -97,15 +44,54 @@ function App() {
           />
 
           <Route
-  path="/profile"
-  element={
-    <ProtectedRoute>
-      <ProfilePage />
-    </ProtectedRoute>
-  }
-/>
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* fallback */}
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <MessagesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/search-users"
+            element={
+              <ProtectedRoute>
+                <SearchUsersPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/manage-connections"
+            element={
+              <ProtectedRoute>
+                <ManageConnectionsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/users/:userId/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfileViewPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Optional: keep old /dashboard links working */}
+          <Route path="/dashboard" element={<Navigate to="/home" replace />} />
+
+          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

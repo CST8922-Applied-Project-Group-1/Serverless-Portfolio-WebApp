@@ -3,24 +3,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 30%),
+    linear-gradient(135deg, #f4f7fb 0%, #eef2f7 100%);
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .login-card {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
   width: 100%;
-  max-width: 440px;
-  padding: 2.5rem;
-  animation: fadeIn 0.5s ease;
+  max-width: 460px;
+  padding: 32px 28px;
+  animation: fadeIn 0.35s ease;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-14px);
   }
   to {
     opacity: 1;
@@ -30,81 +33,80 @@
 
 .login-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
 .login-header h1 {
-  color: #333;
+  color: #111827;
   font-size: 2rem;
-  margin-bottom: 0.5rem;
+  margin: 0 0 8px;
   font-weight: 700;
 }
 
 .login-header p {
-  color: #666;
-  font-size: 0.95rem;
+  color: #6b7280;
+  font-size: 0.96rem;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 18px;
 }
 
 .error-message {
-  background-color: #fee;
-  color: #c33;
-  padding: 0.875rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  border: 1px solid #fcc;
-  animation: shake 0.3s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 0.92rem;
+  border: 1px solid #fecaca;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .form-group label {
-  color: #333;
+  color: #374151;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
 }
 
 .form-group input {
-  padding: 0.875rem;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  padding: 14px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  font-size: 0.98rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   outline: none;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #111827;
 }
 
 .form-group input:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
 .form-group input.error {
-  border-color: #c33;
+  border-color: #dc2626;
+  background: #fff8f8;
 }
 
 .form-group input::placeholder {
-  color: #aaa;
+  color: #9ca3af;
 }
 
 .field-error {
-  color: #c33;
-  font-size: 0.85rem;
-  margin-top: -0.25rem;
+  color: #dc2626;
+  font-size: 0.84rem;
+  margin-top: -2px;
 }
 
 .password-input-wrapper {
@@ -115,25 +117,27 @@
 
 .password-input-wrapper input {
   width: 100%;
-  padding-right: 3rem;
+  padding-right: 52px;
 }
 
 .toggle-password {
   position: absolute;
-  right: 0.75rem;
+  right: 12px;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.25rem;
-  padding: 0.25rem;
+  font-size: 1.1rem;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease;
+  color: #6b7280;
+  transition: opacity 0.2s ease, color 0.2s ease;
 }
 
 .toggle-password:hover {
-  opacity: 0.7;
+  opacity: 0.8;
+  color: #111827;
 }
 
 .form-options {
@@ -141,96 +145,103 @@
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 10px;
 }
 
 .remember-me {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
 }
 
 .remember-me input[type="checkbox"] {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 18px;
+  height: 18px;
   cursor: pointer;
-  accent-color: #667eea;
+  accent-color: #2563eb;
 }
 
 .remember-me span {
-  color: #555;
+  color: #4b5563;
   font-size: 0.9rem;
 }
 
 .forgot-password-link {
-  color: #667eea;
+  color: #2563eb;
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
 }
 
 .forgot-password-link:hover {
-  color: #764ba2;
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
 .login-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2563eb;
   color: white;
   border: none;
-  padding: 1rem;
-  border-radius: 8px;
+  padding: 14px 18px;
+  border-radius: 14px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  margin-top: 0.5rem;
+  transition: background 0.2s ease, transform 0.2s ease;
+  margin-top: 4px;
 }
 
-.login-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+.login-button:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
 }
 
 .login-button:active {
   transform: translateY(0);
 }
 
+.login-button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
 .register-section {
   text-align: center;
-  margin-top: 0.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e0e0e0;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .register-section p {
-  color: #666;
+  color: #6b7280;
   font-size: 0.95rem;
+  margin: 0;
 }
 
 .register-link {
-  color: #667eea;
+  color: #2563eb;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
+  text-decoration: none;
 }
 
 .register-link:hover {
-  color: #764ba2;
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
 @media (max-width: 480px) {
   .login-card {
-    padding: 2rem 1.5rem;
+    padding: 24px 18px;
+    border-radius: 18px;
   }
 
   .login-header h1 {
-    font-size: 1.75rem;
+    font-size: 1.7rem;
   }
 
   .form-options {

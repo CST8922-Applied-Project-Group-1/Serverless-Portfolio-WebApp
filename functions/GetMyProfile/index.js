@@ -27,51 +27,36 @@ module.exports = async function (context, req) {
   }
 
   try {
-    const routeUserId = Number(context.bindingData.userId);
-
-    if (!routeUserId || Number.isNaN(routeUserId)) {
-      context.res = {
-        status: 400,
-        headers: corsHeaders,
-        body: { error: 'Invalid userId route parameter' }
-      };
-      return;
-    }
-
-    if (routeUserId !== Number(auth.user.userId)) {
-      context.res = {
-        status: 403,
-        headers: corsHeaders,
-        body: { error: 'Forbidden' }
-      };
-      return;
-    }
-
     const pool = await getConnection();
 
     const result = await pool.request()
-      .input('userId', sql.Int, routeUserId)
+      .input('userId', sql.Int, auth.user.userId)
       .query(`
-        SELECT *
-        FROM dbo.Connections
-        WHERE UserId1 = @userId OR UserId2 = @userId
-        ORDER BY ConnectedAt DESC
+        SELECT TOP 1 *
+        FROM dbo.Profiles
+        WHERE UserId = @userId
       `);
+
+    if (result.recordset.length === 0) {
+      context.res = {
+        status: 404,
+        headers: corsHeaders,
+        body: { error: 'Profile not found' }
+      };
+      return;
+    }
 
     context.res = {
       status: 200,
       headers: corsHeaders,
-      body: result.recordset
+      body: result.recordset[0]
     };
   } catch (error) {
-    context.log.error('Error fetching connections:', error);
+    context.log.error('GetMyProfile error:', error);
     context.res = {
       status: 500,
       headers: corsHeaders,
-      body: {
-        error: 'Failed to fetch connections',
-        details: error.message
-      }
+      body: { error: 'Failed to fetch profile', details: error.message }
     };
   }
 };

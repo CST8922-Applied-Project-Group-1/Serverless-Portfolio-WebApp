@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Login.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://portfolio-dev-func-se9pa3.azurewebsites.net/api';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -19,37 +19,44 @@ const Login = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+
     setLoginError('');
   };
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = 'Email is required';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
+      return;
+    }
+
+    if (!API_URL) {
+      setLoginError('API URL is not configured');
       return;
     }
 
@@ -57,30 +64,30 @@ const Login = () => {
     setLoginError('');
 
     try {
-      // Call Azure Functions backend
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        email: formData.username,
+      const response = await axios.post(`${API_URL}/login`, {
+        email: formData.username.trim(),
         password: formData.password
       });
 
       if (response.data.success) {
         const { token, user } = response.data;
-        
-        // Store auth token
+
         localStorage.setItem('authToken', token);
         localStorage.setItem('user', JSON.stringify(user));
-        
+
         if (formData.rememberMe) {
           localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('rememberMe');
         }
-        
-        alert(`Login successful! Welcome ${user.name}`);
-        navigate('/dashboard');
+
+        navigate('/home');
       } else {
         setLoginError(response.data.error || 'Login failed');
       }
     } catch (error) {
       console.error('Login error:', error);
+
       if (error.response?.data?.error) {
         setLoginError(error.response.data.error);
       } else if (error.response?.status === 401) {
@@ -102,14 +109,10 @@ const Login = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
-          {loginError && (
-            <div className="error-message">
-              {loginError}
-            </div>
-          )}
+          {loginError && <div className="error-message">{loginError}</div>}
 
           <div className="form-group">
-            <label htmlFor="username">Username or Email</label>
+            <label htmlFor="username">Email</label>
             <input
               type="text"
               id="username"
@@ -117,7 +120,7 @@ const Login = () => {
               value={formData.username}
               onChange={handleChange}
               className={errors.username ? 'error' : ''}
-              placeholder="Enter your username"
+              placeholder="Enter your email"
             />
             {errors.username && (
               <span className="field-error">{errors.username}</span>
@@ -170,7 +173,12 @@ const Login = () => {
           </button>
 
           <div className="register-section">
-            <p>Don't have an account? <Link to="/register" className="register-link">Register</Link></p>
+            <p>
+              Don&apos;t have an account?{' '}
+              <Link to="/register" className="register-link">
+                Register
+              </Link>
+            </p>
           </div>
         </form>
       </div>

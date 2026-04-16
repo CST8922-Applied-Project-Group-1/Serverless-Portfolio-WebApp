@@ -27,22 +27,13 @@ module.exports = async function (context, req) {
   }
 
   try {
-    const routeUserId = Number(context.bindingData.userId);
+    const otherUserId = parseInt(context.bindingData.otherUserId, 10);
 
-    if (!routeUserId || Number.isNaN(routeUserId)) {
+    if (Number.isNaN(otherUserId)) {
       context.res = {
         status: 400,
         headers: corsHeaders,
-        body: { error: 'Invalid userId route parameter' }
-      };
-      return;
-    }
-
-    if (routeUserId !== Number(auth.user.userId)) {
-      context.res = {
-        status: 403,
-        headers: corsHeaders,
-        body: { error: 'Forbidden' }
+        body: { error: 'Invalid user id' }
       };
       return;
     }
@@ -50,12 +41,37 @@ module.exports = async function (context, req) {
     const pool = await getConnection();
 
     const result = await pool.request()
-      .input('userId', sql.Int, routeUserId)
+      .input('userId', sql.Int, auth.user.userId)
+      .input('otherUserId', sql.Int, otherUserId)
       .query(`
-        SELECT *
-        FROM dbo.Connections
-        WHERE UserId1 = @userId OR UserId2 = @userId
-        ORDER BY ConnectedAt DESC
+        SELECT
+          MessageId,
+          FromUserId,
+          ToUserId,
+          Content,
+          SentAt,
+          IsRead,
+          ReadAt
+        FROM dbo.Messages
+        WHERE (
+                (FromUserId = @userId AND ToUserId = @otherUserId)
+             OR (FromUserId = @otherUserId AND ToUserId = @userId)
+              )
+          AND IsDeleted = 0
+        ORDER BY SentAt ASC;
+      `);
+
+    await pool.request()
+      .input('userId', sql.Int, auth.user.userId)
+      .input('otherUserId', sql.Int, otherUserId)
+      .query(`
+        UPDATE dbo.Messages
+        SET IsRead = 1,
+            ReadAt = GETDATE()
+        WHERE FromUserId = @otherUserId
+          AND ToUserId = @userId
+          AND IsRead = 0
+          AND IsDeleted = 0;
       `);
 
     context.res = {
@@ -64,12 +80,12 @@ module.exports = async function (context, req) {
       body: result.recordset
     };
   } catch (error) {
-    context.log.error('Error fetching connections:', error);
+    context.log.error('GetMessages error:', error);
     context.res = {
       status: 500,
       headers: corsHeaders,
       body: {
-        error: 'Failed to fetch connections',
+        error: 'Failed to fetch messages',
         details: error.message
       }
     };

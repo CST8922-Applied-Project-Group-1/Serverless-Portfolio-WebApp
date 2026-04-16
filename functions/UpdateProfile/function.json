@@ -5,8 +5,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["get", "options"],
-      "route": "connections/user/{userId}"
+      "methods": ["put"],
+      "route": "profile"
     },
     {
       "type": "http",

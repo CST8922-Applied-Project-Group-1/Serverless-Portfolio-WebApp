@@ -10,39 +10,24 @@ module.exports = async function (context, req) {
   };
 
   if (req.method === 'OPTIONS') {
-    context.res = {
-      status: 200,
-      headers: corsHeaders
-    };
+    context.res = { status: 200, headers: corsHeaders };
     return;
   }
 
   const auth = validateToken(req);
   if (!auth.valid) {
-    context.res = {
-      ...unauthorizedResponse(auth.error),
-      headers: corsHeaders
-    };
+    context.res = { ...unauthorizedResponse(auth.error), headers: corsHeaders };
     return;
   }
 
   try {
-    const routeUserId = Number(context.bindingData.userId);
+    const userId = Number(context.bindingData.userId);
 
-    if (!routeUserId || Number.isNaN(routeUserId)) {
+    if (!userId) {
       context.res = {
         status: 400,
         headers: corsHeaders,
-        body: { error: 'Invalid userId route parameter' }
-      };
-      return;
-    }
-
-    if (routeUserId !== Number(auth.user.userId)) {
-      context.res = {
-        status: 403,
-        headers: corsHeaders,
-        body: { error: 'Forbidden' }
+        body: { error: 'Invalid user id' }
       };
       return;
     }
@@ -50,26 +35,44 @@ module.exports = async function (context, req) {
     const pool = await getConnection();
 
     const result = await pool.request()
-      .input('userId', sql.Int, routeUserId)
+      .input('userId', sql.Int, userId)
       .query(`
-        SELECT *
-        FROM dbo.Connections
-        WHERE UserId1 = @userId OR UserId2 = @userId
-        ORDER BY ConnectedAt DESC
+        SELECT TOP 1
+          UserId,
+          Name,
+          Email,
+          Bio,
+          Skills,
+          Experience,
+          ProfileImageUrl,
+          CreatedAt,
+          UpdatedAt
+        FROM dbo.Profiles
+        WHERE UserId = @userId
+          AND IsActive = 1;
       `);
+
+    if (result.recordset.length === 0) {
+      context.res = {
+        status: 404,
+        headers: corsHeaders,
+        body: { error: 'Profile not found' }
+      };
+      return;
+    }
 
     context.res = {
       status: 200,
       headers: corsHeaders,
-      body: result.recordset
+      body: result.recordset[0]
     };
   } catch (error) {
-    context.log.error('Error fetching connections:', error);
+    context.log.error('GetUserProfileById error:', error);
     context.res = {
       status: 500,
       headers: corsHeaders,
       body: {
-        error: 'Failed to fetch connections',
+        error: 'Failed to fetch user profile',
         details: error.message
       }
     };

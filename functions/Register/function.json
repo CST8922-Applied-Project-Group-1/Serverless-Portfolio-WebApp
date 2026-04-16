@@ -5,8 +5,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["post"],
-      "route": "auth/register"
+      "methods": ["post", "options"],
+      "route": "register"
     },
     {
       "type": "http",

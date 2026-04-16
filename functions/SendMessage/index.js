@@ -1,57 +1,86 @@
-const sql = require('mssql');
+const { validateToken, unauthorizedResponse } = require('../shared/auth');
+const { sql, getConnection } = require('../shared/db');
 
 module.exports = async function (context, req) {
-    const { fromUserId, toUserId, content } = req.body;
+  const corsHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': 'http://localhost:3000',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+  };
 
-    if (!fromUserId || !toUserId || !content) {
-        context.res = {
-            status: 400,
-            body: { error: 'fromUserId, toUserId, and content are required' }
-        };
-        return;
+  if (req.method === 'OPTIONS') {
+    context.res = {
+      status: 200,
+      headers: corsHeaders
+    };
+    return;
+  }
+
+  const auth = validateToken(req);
+  if (!auth.valid) {
+    context.res = {
+      ...unauthorizedResponse(auth.error),
+      headers: corsHeaders
+    };
+    return;
+  }
+
+  try {
+    const { toUserId, content } = req.body || {};
+
+    if (!toUserId || !content || !content.trim()) {
+      context.res = {
+        status: 400,
+        headers: corsHeaders,
+        body: { error: 'toUserId and content are required' }
+      };
+      return;
     }
 
-    try {
-        const pool = await sql.connect(process.env.SQL_CONNECTION_STRING);
-        
-        // Insert message into database
-        const result = await pool.request()
-            .input('fromUserId', sql.Int, fromUserId)
-            .input('toUserId', sql.Int, toUserId)
-            .input('content', sql.NVarChar, content)
-            .input('sentAt', sql.DateTime, new Date())
-            .query(`
-                INSERT INTO Messages (FromUserId, ToUserId, Content, SentAt, IsRead)
-                OUTPUT INSERTED.*
-                VALUES (@fromUserId, @toUserId, @content, @sentAt, 0)
-            `);
+    const pool = await getConnection();
 
-        const message = result.recordset[0];
+    const result = await pool.request()
+      .input('fromUserId', sql.Int, auth.user.userId)
+      .input('toUserId', sql.Int, parseInt(toUserId, 10))
+      .input('content', sql.NVarChar(sql.MAX), content.trim())
+      .query(`
+        INSERT INTO dbo.Messages (
+          FromUserId,
+          ToUserId,
+          Content,
+          SentAt,
+          IsRead,
+          IsDeleted
+        )
+        OUTPUT INSERTED.MessageId, INSERTED.FromUserId, INSERTED.ToUserId, INSERTED.Content, INSERTED.SentAt, INSERTED.IsRead
+        VALUES (
+          @fromUserId,
+          @toUserId,
+          @content,
+          GETDATE(),
+          0,
+          0
+        );
+      `);
 
-        // Send to Service Bus for async processing
-        context.bindings.outputMessage = {
-            messageId: message.MessageId,
-            fromUserId: message.FromUserId,
-            toUserId: message.ToUserId,
-            content: message.Content,
-            sentAt: message.SentAt
-        };
-
-        context.res = {
-            status: 201,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: message
-        };
-    } catch (error) {
-        context.log.error('Error sending message:', error);
-        context.res = {
-            status: 500,
-            body: { error: 'Failed to send message' }
-        };
-    } finally {
-        await sql.close();
-    }
+    context.res = {
+      status: 201,
+      headers: corsHeaders,
+      body: {
+        success: true,
+        ...result.recordset[0]
+      }
+    };
+  } catch (error) {
+    context.log.error('SendMessage error:', error);
+    context.res = {
+      status: 500,
+      headers: corsHeaders,
+      body: {
+        error: 'Failed to send message',
+        details: error.message
+      }
+    };
+  }
 };

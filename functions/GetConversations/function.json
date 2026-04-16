@@ -6,7 +6,7 @@
       "direction": "in",
       "name": "req",
       "methods": ["get", "options"],
-      "route": "connections/user/{userId}"
+      "route": "messages/conversations/{userId}"
     },
     {
       "type": "http",

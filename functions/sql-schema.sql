@@ -11,15 +11,15 @@ IF OBJECT_ID('Profiles', 'U') IS NOT NULL DROP TABLE Profiles;
 -- Profiles Table
 -- ================================================
 CREATE TABLE Profiles (
-    UserId INT PRIMARY KEY IDENTITY(1,1),
-    Name NVARCHAR(255) NOT NULL,
-    Email NVARCHAR(255) NOT NULL UNIQUE,
-    Bio NVARCHAR(MAX),
-    Skills NVARCHAR(MAX), -- JSON array of skills
-    ProfileImageUrl NVARCHAR(512),
-    CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
-    UpdatedAt DATETIME NOT NULL DEFAULT GETDATE(),
-    IsActive BIT NOT NULL DEFAULT 1
+    ProfileId INT IDENTITY(1,1) PRIMARY KEY,
+    UserId INT NOT NULL UNIQUE,
+    Name NVARCHAR(100) NOT NULL,
+    Email NVARCHAR(255) NOT NULL,
+    Bio NVARCHAR(MAX) NULL,
+    Skills NVARCHAR(MAX) NULL,
+    Experience NVARCHAR(MAX) NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE()
 );
 
 -- ================================================

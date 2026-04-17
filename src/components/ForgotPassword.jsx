@@ -58,7 +58,7 @@ const ForgotPassword = () => {
             <div className="success-icon">✓</div>
             <h2>Check Your Email</h2>
             <p>We've sent password reset instructions to your email address.</p>
-            <Link to="/" className="back-to-login-button">
+            <Link to="/login" className="back-to-login-button">
               Back to Login
             </Link>
           </div>
@@ -93,7 +93,7 @@ const ForgotPassword = () => {
             </button>
 
             <div className="back-to-login">
-              <Link to="/" className="back-link">
+              <Link to="/login" className="back-link">
                 ← Back to Login
               </Link>
             </div>

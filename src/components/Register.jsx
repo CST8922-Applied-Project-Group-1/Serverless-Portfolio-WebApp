@@ -92,7 +92,7 @@ const Register = () => {
     try {
       const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
 
-      const response = await axios.post(`${API_URL}/register`, {
+      const response = await axios.post(`${API_URL}/auth/register`, {
         name: fullName,
         email: formData.email.trim().toLowerCase(),
         password: formData.password
@@ -268,7 +268,7 @@ const Register = () => {
           <div className="login-section">
             <p>
               Already have an account?{' '}
-              <Link to="/" className="login-link">
+              <Link to="/login" className="login-link">
                 Sign In
               </Link>
             </p>

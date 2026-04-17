@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/Login.css';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:7071/api';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -64,7 +64,7 @@ const Login = () => {
     setLoginError('');
 
     try {
-      const response = await axios.post(`${API_URL}/login`, {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         email: formData.username.trim(),
         password: formData.password
       });

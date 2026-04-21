@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 module.exports = async function (context, req) {
     const corsHeaders = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'http://localhost:3000',
+        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
